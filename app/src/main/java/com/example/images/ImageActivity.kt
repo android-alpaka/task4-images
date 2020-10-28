@@ -46,13 +46,13 @@ class ImageActivity : AppCompatActivity() {
 
     }
 
-    private fun onLoadCompleted(res: Bitmap?) {
+    internal fun onLoadCompleted(res: Bitmap?) {
         image_view.setImageBitmap(res)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_image)
         ImageDescrptionURLLoader(this).execute(intent.extras?.getString("url"))
     }
 }

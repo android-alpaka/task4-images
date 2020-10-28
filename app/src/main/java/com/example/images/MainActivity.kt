@@ -23,7 +23,7 @@ class MainActivity : AppCompatActivity() {
         override fun doInBackground(vararg params: String): List<Image> {
             val imagesList = mutableListOf<Image>()
             val url =
-                "https://api.vk.com/method/photos.search?q=${params[0]}&count=1000&access_token=${params[1]}&v=5.77"
+                "https://api.vk.com/method/photos.search?q=${params[1]}&access_token=${params[0]}&count=1000&v=5.77"
             Log.i("connect", "Connecting to $url")
             try {
                 InputStreamReader(
