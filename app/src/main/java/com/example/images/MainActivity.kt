@@ -17,8 +17,7 @@ class MainActivity : AppCompatActivity() {
 
     private var imagesList: List<Image>? = null
 
-    private class ImageDescrptionURLLoader(val activity: MainActivity) :
-        AsyncTask<String, Void, List<Image>>() {
+    private class ImageDescriptionURLLoader(val activity: MainActivity) :  AsyncTask<String, Void, List<Image>>() {
 
         override fun doInBackground(vararg params: String): List<Image> {
             val imagesList = mutableListOf<Image>()
@@ -76,15 +75,12 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-    }
-
-    override fun onResume() {
-        super.onResume()
         if (imagesList == null) {
-            ImageDescrptionURLLoader(this).execute(
-                "2758906627589066275890663d272c1386227582758906678d722c4923d8ea364a189b4",
+            ImageDescriptionURLLoader(this).execute(
+                " ",
                 "nature"
             )
         }
     }
+
 }
