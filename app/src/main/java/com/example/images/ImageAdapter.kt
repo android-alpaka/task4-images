@@ -18,11 +18,10 @@ class ImageAdapter(
                         .from(parent.context)
                         .inflate(R.layout.list_item, parent, false)
         )
-        holder.itemView.setOnClickListener {
+        holder.root.setOnClickListener {
             onClick(images[holder.adapterPosition])
         }
         return holder
-
     }
 
     override fun onBindViewHolder(holder: ImageViewHolder, position: Int) =
