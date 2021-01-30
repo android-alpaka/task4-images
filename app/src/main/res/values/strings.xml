@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Images</string>
+    <string name="descrip">Картинка</string>
     <integer name="com_vk_sdk_AppId">7635936</integer>
 </resources>

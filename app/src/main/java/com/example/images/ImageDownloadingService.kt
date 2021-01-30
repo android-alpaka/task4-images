@@ -8,68 +8,81 @@ import android.os.AsyncTask
 import android.os.Binder
 import android.os.IBinder
 import android.util.Log
+import android.util.LruCache
 import java.lang.ref.WeakReference
 import java.net.URL
 import java.io.IOException
 
 class ImageDownloadingService : Service() {
-    private var lastURL : String? = null
-    var bimage : Bitmap? = null
+    private val sample = Bitmap.createBitmap(1,1,Bitmap.Config.ARGB_8888)
     private val binder = MyBinder()
+    internal var cache = LruCache<String, Bitmap>(10*1024*1024)
 
-    private class ImageLoader(service: ImageDownloadingService) : AsyncTask<String, Void, Bitmap>() {
+    private class ImageLoader(service: ImageDownloadingService) : AsyncTask<String, Void, Pair<String,Bitmap>>() {
 
         private val serviceRef = WeakReference(service)
 
-        override fun doInBackground(vararg params: String): Bitmap? {
+        override fun doInBackground(vararg params: String): Pair<String,Bitmap> {
             val imageUrl = params[0]
-            Log.i("connect", "Connecting to $imageUrl")
-            var bimage: Bitmap? = null
+            Log.i("CONNECT", "Connecting to $imageUrl")
+            lateinit var bimage: Bitmap
             try {
                 val inputStream = URL(imageUrl).openStream()
                 bimage = BitmapFactory.decodeStream(inputStream)
-                Log.i("INFO","AAAAAAAAAAAAAAAAAAA")
+                Log.i("SERVICE/CONNECT","Image $imageUrl downloaded")
             } catch (e: IOException) {
-                Log.e("image", "Failed to load image ${e.message}", e)
+                Log.e("SERVICE/CONNECT", "Failed to load image ${e.message}", e)
                 e.printStackTrace()
             }
-            return bimage
+            return Pair(imageUrl,bimage)
         }
 
-        override fun onPostExecute(result: Bitmap) {
-            val activity = serviceRef.get()
-            activity?.bimage=result
-            activity?.sendBroadcast(Intent("IMAGE DOWNLOADED").addCategory(Intent.CATEGORY_DEFAULT))
+        override fun onPostExecute(result: Pair<String,Bitmap>) {
+            val service = serviceRef.get()
+            service!!.cache.put(result.first,result.second)
+            service.sendBroadcast(Intent("IMAGE ${result.first} DOWNLOADED").addCategory(Intent.CATEGORY_DEFAULT))
         }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        Log.i("INFO","BBBBBBBBBBBBBBBBBBB")
-        return START_NOT_STICKY
-
+        Log.i("SERVICE","Service started")
+        return START_STICKY
     }
 
     override fun onBind(intent: Intent): IBinder {
-        Log.i("INFO","CCCCCCCCCCCCCCCCCCCCCC")
-        if(!lastURL.equals(intent.getStringExtra("url"))) {
-            lastURL = intent.getStringExtra("url")
-            ImageLoader(this).execute(
-                lastURL
-            )
+        Log.i("SERVICE","Task binded")
+        val url = intent.getStringExtra("url")
+        if(cache[url]!=sample){
+            if(cache[url]==null){
+                cache.put(url,sample)
+                Log.i("SERVICE","Image downloading")
+                ImageLoader(this).execute(url)
+            } else {
+                sendBroadcast(Intent("IMAGE $url DOWNLOADED").addCategory(Intent.CATEGORY_DEFAULT))
+                Log.i("SERVICE","Image restored")
+            }
+        } else {
+            Log.i("SERVICE","AsyncTask not completed")
         }
         return binder
     }
 
-    override fun onUnbind(intent: Intent?): Boolean {
-        return true
-    }
+    override fun onUnbind(intent: Intent?) = true
 
-    override fun onRebind(intent: Intent?) {
-        if (!intent?.getStringExtra("url").equals(lastURL)) {
-            lastURL = intent?.getStringExtra("url")
-            ImageLoader(this).execute(lastURL)
+    override fun onRebind(intent: Intent) {
+        Log.i("SERVICE","Task rebinded")
+        val url = intent.getStringExtra("url")
+        if(cache[url]!=sample){
+            if(cache[url]==null){
+                cache.put(url,sample)
+                Log.i("SERVICE","Image downloading")
+                ImageLoader(this).execute(url)
+            } else {
+                sendBroadcast(Intent("IMAGE $url DOWNLOADED").addCategory(Intent.CATEGORY_DEFAULT))
+                Log.i("SERVICE","Image restored")
+            }
         } else {
-            sendBroadcast(Intent("IMAGE DOWNLOADED").addCategory(Intent.CATEGORY_DEFAULT))
+            Log.i("SERVICE","AsyncTask not completed")
         }
     }
 

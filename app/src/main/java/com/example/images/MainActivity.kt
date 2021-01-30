@@ -1,5 +1,6 @@
 package com.example.images
 
+import android.app.DownloadManager
 import android.content.Intent
 import android.os.AsyncTask
 import androidx.appcompat.app.AppCompatActivity
@@ -15,13 +16,14 @@ import java.lang.ref.WeakReference
 import java.net.URL
 
 class MainActivity : AppCompatActivity() {
-    private var imagesList: List<Image>? = null
+    private var imagesList = ArrayList<Image>()
+    private var imagesListAsString = "null"
+    private lateinit var ex:DownloadManager
 
-    private class ImageDescriptionURLLoader(activity: MainActivity) :  AsyncTask<String, Void, List<Image>>() {
+    private class ImageDescriptionURLLoader(activity: MainActivity) :  AsyncTask<String, Void, String>() {
         private val activityRef = WeakReference(activity)
 
-        override fun doInBackground(vararg params: String): List<Image> {
-            val imagesList = mutableListOf<Image>()
+        override fun doInBackground(vararg params: String): String {
             val url =
                 "https://api.vk.com/method/photos.search?q=${params[1]}&access_token=${params[0]}&count=10&v=5.77"
             Log.i("connect", "Connecting to $url")
@@ -31,37 +33,38 @@ class MainActivity : AppCompatActivity() {
                         .openConnection()
                         .getInputStream()
                 ).use {
-                    val parser = JSONParser()
-                    val root = parser.parse(it.readText()) as JSONObject
-                    val response = root["response"] as JSONObject
-                    val items = response["items"] as JSONArray
-                    for (item in items) {
-                        item as JSONObject
-                        val text = item["text"] as String
-                        val sizes = item["sizes"] as JSONArray
-                        val size = sizes.last() as JSONObject
-                        val imageUrl = size["url"] as String
-                        imagesList.add(Image(text, imageUrl))
-                    }
+                    return it.readText()
                 }
             } catch (e: IOException) {
                 Log.e("connect", "Connection failed: ${e.message}", e)
                 e.printStackTrace()
+                return ""
             }
-            return imagesList
         }
 
-        override fun onPostExecute(res: List<Image>) {
-            activityRef.get()?.onLoadCompleted(res)
+        override fun onPostExecute(res: String) {
+            activityRef.get()!!.imagesListAsString=res
+            activityRef.get()?.fillRecyclerView()
         }
     }
 
-    internal fun onLoadCompleted(res: List<Image>) {
+    internal fun fillRecyclerView() {
         val viewManager = LinearLayoutManager(this)
-        imagesList = res
+        val parser = JSONParser()
+        val root = parser.parse(imagesListAsString) as JSONObject
+        val response = root["response"] as JSONObject
+        val items = response["items"] as JSONArray
+        for (item in items) {
+            item as JSONObject
+            val text = item["text"] as String
+            val sizes = item["sizes"] as JSONArray
+            val size = sizes.last() as JSONObject
+            val imageUrl = size["url"] as String
+            imagesList.add(Image(text, imageUrl))
+        }
         images.apply {
             layoutManager = viewManager
-            adapter = ImageAdapter(res) {
+            adapter = ImageAdapter(imagesList) {
                 startActivity(
                     Intent(this@MainActivity, ImageActivity::class.java).putExtra(
                         "url",
@@ -74,20 +77,31 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val intentDownloadImage = Intent(this, ImageDownloadingService::class.java)
-        stopService(intentDownloadImage)
         setContentView(R.layout.activity_main)
-        if (imagesList == null) {
+        startService(Intent(this, ImageDownloadingService::class.java))
+        if (savedInstanceState?.getString("LIST") == null) {
             ImageDescriptionURLLoader(this).execute(
                 "2758906627589066275890663d272c1386227582758906678d722c4923d8ea364a189b4",
                 "nature"
             )
+        } else {
+            imagesListAsString = savedInstanceState.getString("LIST").toString()
+            fillRecyclerView()
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        val intentDownloadImage = Intent(this, ImageDownloadingService::class.java)
-        stopService(intentDownloadImage)
+    /*override fun onSaveInstanceState(outState: Bundle) {
+        outState.putString("LIST", imagesListAsString)
+        super.onSaveInstanceState(outState)
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        imagesListAsString = savedInstanceState.getString("LIST").toString()
+    }*/
+
+    override fun onDestroy() {
+        super.onDestroy()
+        stopService(Intent(this, ImageDownloadingService::class.java))
     }
 }
