@@ -1,6 +1,5 @@
 package com.example.images
 
-import android.app.DownloadManager
 import android.content.Intent
 import android.os.AsyncTask
 import androidx.appcompat.app.AppCompatActivity
@@ -18,7 +17,7 @@ import java.net.URL
 class MainActivity : AppCompatActivity() {
     private var imagesList = ArrayList<Image>()
     private var imagesListAsString = "null"
-    private lateinit var ex:DownloadManager
+    //private lateinit var intentService : Intent
 
     private class ImageDescriptionURLLoader(activity: MainActivity) :  AsyncTask<String, Void, String>() {
         private val activityRef = WeakReference(activity)
@@ -49,7 +48,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     internal fun fillRecyclerView() {
-        val viewManager = LinearLayoutManager(this)
         val parser = JSONParser()
         val root = parser.parse(imagesListAsString) as JSONObject
         val response = root["response"] as JSONObject
@@ -62,11 +60,12 @@ class MainActivity : AppCompatActivity() {
             val imageUrl = size["url"] as String
             imagesList.add(Image(text, imageUrl))
         }
+        val viewManager = LinearLayoutManager(this)
         images.apply {
             layoutManager = viewManager
             adapter = ImageAdapter(imagesList) {
                 startActivity(
-                    Intent(this@MainActivity, ImageActivity::class.java).putExtra(
+                    Intent(this@MainActivity,ImageActivity::class.java).putExtra(
                         "url",
                         it.url
                     )
@@ -78,30 +77,35 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        startService(Intent(this, ImageDownloadingService::class.java))
-        if (savedInstanceState?.getString("LIST") == null) {
+        //Log.i("MAIN","Main created")
+        //intentService=Intent(this,ImageDownloadingService::class.java)
+        //startService(intentService)
+        imagesListAsString = savedInstanceState?.getString("LIST").toString()
+        if (imagesListAsString == "null") {
             ImageDescriptionURLLoader(this).execute(
                 "2758906627589066275890663d272c1386227582758906678d722c4923d8ea364a189b4",
                 "nature"
             )
         } else {
-            imagesListAsString = savedInstanceState.getString("LIST").toString()
             fillRecyclerView()
         }
     }
 
-    /*override fun onSaveInstanceState(outState: Bundle) {
+    override fun onSaveInstanceState(outState: Bundle) {
         outState.putString("LIST", imagesListAsString)
+        //Log.i("BUNDLE","saved $imagesListAsString")
         super.onSaveInstanceState(outState)
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
         imagesListAsString = savedInstanceState.getString("LIST").toString()
-    }*/
-
-    override fun onDestroy() {
-        super.onDestroy()
-        stopService(Intent(this, ImageDownloadingService::class.java))
+        //Log.i("BUNDLE","restored $imagesListAsString")
     }
+
+    /*override fun onDestroy() {
+        super.onDestroy()
+        Log.i("MAIN","Main destroyed")
+        //stopService(intentService)
+    }*/
 }
