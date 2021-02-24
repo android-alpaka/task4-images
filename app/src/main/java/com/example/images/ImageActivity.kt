@@ -44,12 +44,13 @@ class ImageActivity : AppCompatActivity() {
         //    this@ImageActivity,
         //    ImageDownloadingService::class.java
         //).putExtra("url", url)
+        val intentFilter = IntentFilter(
+            "IMAGE $url DOWNLOADED"
+        )
+        registerReceiver(broadcastReceiver, intentFilter)
         if(memoryCache.get(url)==null){
-            val intentFilter = IntentFilter(
-                "IMAGE $url DOWNLOADED"
-            )
+
             intentFilter.addCategory(Intent.CATEGORY_DEFAULT)
-            registerReceiver(broadcastReceiver, intentFilter)
 
             startService(
                 Intent(this, IntentImageDownloadingService::class.java).putExtra(
@@ -73,6 +74,5 @@ class ImageActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         unregisterReceiver(broadcastReceiver)
-        //if (bound){ unbindService(sConn) }
     }
 }
