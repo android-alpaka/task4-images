@@ -13,12 +13,7 @@ class ImageActivity : AppCompatActivity() {
     companion object {
         private val maxMemory = (Runtime.getRuntime().maxMemory() / 1024).toInt()
         private val cacheSize = maxMemory / 8
-        val memoryCache: LruCache<String, Bitmap> =
-            object : LruCache<String, Bitmap>(cacheSize) {
-                override fun sizeOf(key: String, bitmap: Bitmap): Int {
-                    return bitmap.byteCount / 1024
-                }
-            }
+        val memoryCache: LruCache<String, Bitmap> = LruCache<String, Bitmap>(cacheSize)
     }
     lateinit var url : String
     private val broadcastReceiver = PictureBroadcastReceiver()
@@ -44,14 +39,10 @@ class ImageActivity : AppCompatActivity() {
         //    this@ImageActivity,
         //    ImageDownloadingService::class.java
         //).putExtra("url", url)
-        val intentFilter = IntentFilter(
-            "IMAGE $url DOWNLOADED"
-        )
+        val intentFilter = IntentFilter(Intent.ACTION_ANSWER)
+        intentFilter.addCategory(Intent.CATEGORY_DEFAULT)
         registerReceiver(broadcastReceiver, intentFilter)
         if(memoryCache.get(url)==null){
-
-            intentFilter.addCategory(Intent.CATEGORY_DEFAULT)
-
             startService(
                 Intent(this, IntentImageDownloadingService::class.java).putExtra(
                     "url",
