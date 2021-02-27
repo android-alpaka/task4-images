@@ -14,12 +14,6 @@
         <service
             android:name=".IntentImageDownloadingService"
             android:exported="false" />
-
-        <service
-            android:name=".ImageDownloadingService"
-            android:enabled="true"
-            android:exported="false" />
-
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

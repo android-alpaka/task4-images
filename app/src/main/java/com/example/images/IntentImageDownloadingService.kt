@@ -19,7 +19,7 @@ class IntentImageDownloadingService : IntentService("IntentImageDownloadingServi
     }
 
     @SuppressLint("StaticFieldLeak")
-    inner class DownloadPictureAsyncTask(service: IntentImageDownloadingService) : AsyncTask<String,Unit,Pair<String,Bitmap?>>() {
+    inner class DownloadPictureAsyncTask(service: IntentImageDownloadingService) : AsyncTask<String,Int,Pair<String,Bitmap?>>() {
         private val serviceRef = WeakReference(service)
 
         override fun doInBackground(vararg params: String): Pair<String, Bitmap?> {
@@ -28,7 +28,7 @@ class IntentImageDownloadingService : IntentService("IntentImageDownloadingServi
             try {
                 val inputStream = URL(imageUrl).openStream()
                 bimage = BitmapFactory.decodeStream(inputStream)
-                Log.i("SERVICE", "Image $imageUrl downloaded")
+                Log.i("SERVICE", "Image ${imageUrl.subSequence(11, 15)} downloaded")
             } catch (e: IOException) {
                 Log.e("SERVICE", "Failed to load image ${e.message}", e)
                 e.printStackTrace()

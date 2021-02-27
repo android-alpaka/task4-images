@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
 import android.util.LruCache
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_image.*
 
@@ -34,7 +35,7 @@ class ImageActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_image)
         url = intent.extras?.getString("url").toString()
-        Log.i("IMAGE_ACTIVITY","IMAGE_ACTIVITY $url created")
+        Log.i("IMAGE_ACTIVITY", "IMAGE_ACTIVITY ${url.subSequence(11, 15)} created")
         //val intentDownloading = Intent(
         //    this@ImageActivity,
         //    ImageDownloadingService::class.java
@@ -43,6 +44,7 @@ class ImageActivity : AppCompatActivity() {
         intentFilter.addCategory(Intent.CATEGORY_DEFAULT)
         registerReceiver(broadcastReceiver, intentFilter)
         if(memoryCache.get(url)==null){
+            //progressBar.visibility = View.VISIBLE
             startService(
                 Intent(this, IntentImageDownloadingService::class.java).putExtra(
                     "url",
@@ -50,7 +52,9 @@ class ImageActivity : AppCompatActivity() {
                 )
             )
         } else {
+            Log.i("IMAGE_ACTIVITY","IMAGE_ACTIVITY ${url.subSequence(11,15)} restored")
             image_view.setImageBitmap(memoryCache.get(url))
+            progressBar.visibility = View.GONE
         }
         //bound = true
         //bindService(intentDownloading, sConn as ServiceConnection, 0)
@@ -59,6 +63,7 @@ class ImageActivity : AppCompatActivity() {
     inner class PictureBroadcastReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent) {
             image_view.setImageBitmap(memoryCache.get(url))
+            progressBar.visibility = View.GONE
         }
     }
 
