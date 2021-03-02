@@ -16,6 +16,7 @@ class ImageActivity : AppCompatActivity() {
         private val cacheSize = maxMemory / 8
         val memoryCache: LruCache<String, Bitmap> = LruCache<String, Bitmap>(cacheSize)
     }
+
     lateinit var url : String
     private val broadcastReceiver = PictureBroadcastReceiver()
     //var bound = false

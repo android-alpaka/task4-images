@@ -25,7 +25,7 @@ class MainActivity : AppCompatActivity() {
         override fun doInBackground(vararg params: String): String {
             val url =
                 "https://api.vk.com/method/photos.search?q=${params[1]}&access_token=${params[0]}&count=1000&v=5.77"
-            Log.i("connect", "Connecting to $url")
+            Log.i("CONNECT", "Connecting to $url")
             try {
                 InputStreamReader(
                     URL(url)
@@ -47,7 +47,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    internal fun fillRecyclerView() {
+    fun fillRecyclerView() {
         val parser = JSONParser()
         val root = parser.parse(imagesListAsString) as JSONObject
         val response = root["response"] as JSONObject
