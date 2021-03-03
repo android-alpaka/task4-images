@@ -23,7 +23,8 @@ class IntentImageDownloadingService : IntentService("IntentImageDownloadingServi
         }
         if (bimage != null) {
             ImageActivity.memoryCache.put(imageUrl, bimage)
-            sendBroadcast(Intent(Intent.ACTION_ANSWER).addCategory(Intent.CATEGORY_DEFAULT))
+            sendBroadcast(Intent("android.intent.action.DOWNLOAD_ENDED"))
+            Log.i("RECEIVER","Message sent")
         }
     }
 }

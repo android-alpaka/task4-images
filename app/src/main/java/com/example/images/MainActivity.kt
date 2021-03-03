@@ -17,14 +17,13 @@ import java.net.URL
 class MainActivity : AppCompatActivity() {
     private var imagesList = ArrayList<Image>()
     private var imagesListAsString = "null"
-    //private lateinit var intentService : Intent
 
     private class ImageDescriptionURLLoader(activity: MainActivity) :  AsyncTask<String, Void, String>() {
         private val activityRef = WeakReference(activity)
 
         override fun doInBackground(vararg params: String): String {
             val url =
-                "https://api.vk.com/method/photos.search?q=${params[1]}&access_token=${params[0]}&count=1000&v=5.77"
+                "https://api.vk.com/method/photos.search?q=${params[1]}&access_token=${params[0]}&count=20&v=5.77"
             Log.i("CONNECT", "Connecting to $url")
             try {
                 InputStreamReader(
@@ -42,12 +41,15 @@ class MainActivity : AppCompatActivity() {
         }
 
         override fun onPostExecute(res: String) {
-            activityRef.get()!!.imagesListAsString=res
-            activityRef.get()?.fillRecyclerView()
+            val activity = activityRef.get()
+            if (activity != null) {
+                activity.imagesListAsString=res
+                activity.fillRecyclerView()
+            }
         }
     }
 
-    fun fillRecyclerView() {
+    private fun fillRecyclerView() {
         val parser = JSONParser()
         val root = parser.parse(imagesListAsString) as JSONObject
         val response = root["response"] as JSONObject
@@ -77,9 +79,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        //Log.i("MAIN","Main created")
-        //intentService=Intent(this,ImageDownloadingService::class.java)
-        //startService(intentService)
         imagesListAsString = savedInstanceState?.getString("LIST").toString()
         if (imagesListAsString == "null") {
             ImageDescriptionURLLoader(this).execute(
@@ -102,10 +101,4 @@ class MainActivity : AppCompatActivity() {
         imagesListAsString = savedInstanceState.getString("LIST").toString()
         //Log.i("BUNDLE","restored $imagesListAsString")
     }
-
-    /*override fun onDestroy() {
-        super.onDestroy()
-        Log.i("MAIN","Main destroyed")
-        //stopService(intentService)
-    }*/
 }
