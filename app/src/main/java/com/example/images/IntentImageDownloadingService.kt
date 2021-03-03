@@ -1,18 +1,14 @@
 package com.example.images
 
-import android.annotation.SuppressLint
 import android.app.IntentService
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.os.AsyncTask
 import android.util.Log
 import java.io.IOException
-import java.lang.ref.WeakReference
 import java.net.URL
 
 class IntentImageDownloadingService : IntentService("IntentImageDownloadingService") {
-
     override fun onHandleIntent(intent: Intent?) {
         val imageUrl = intent?.getStringExtra("url")
         var bimage: Bitmap? = null

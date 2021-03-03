@@ -3,7 +3,6 @@ package com.example.images
 import android.content.*
 import android.graphics.Bitmap
 import android.os.Bundle
-import android.os.IBinder
 import android.util.Log
 import android.util.LruCache
 import android.view.View
