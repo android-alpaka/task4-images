@@ -39,7 +39,7 @@ class ImageActivity : AppCompatActivity() {
     inner class PictureBroadcastReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent) {
             Log.i("RECEIVER","Message received")
-            image_view.setImageBitmap(memoryCache.get(url))
+            synchronized(memoryCache){ image_view.setImageBitmap(memoryCache.get(url)) }
             progressBar.visibility = View.GONE
         }
     }

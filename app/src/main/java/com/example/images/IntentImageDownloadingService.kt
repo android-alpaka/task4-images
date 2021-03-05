@@ -12,9 +12,7 @@ import java.net.URL
 
 class IntentImageDownloadingService : IntentService("IntentImageDownloadingService") {
     companion object {
-        private val maxMemory = (Runtime.getRuntime().maxMemory() / 1024).toInt()
-        private val cacheSize = maxMemory / 8
-        val memoryCache: LruCache<String, Bitmap> = LruCache<String, Bitmap>(cacheSize)
+        val memoryCache: LruCache<String, Bitmap> = LruCache<String, Bitmap>(20)
     }
 
     override fun onHandleIntent(intent: Intent?) {
