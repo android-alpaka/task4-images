@@ -5,11 +5,18 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
+import android.util.LruCache
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import java.io.IOException
 import java.net.URL
 
 class IntentImageDownloadingService : IntentService("IntentImageDownloadingService") {
+    companion object {
+        private val maxMemory = (Runtime.getRuntime().maxMemory() / 1024).toInt()
+        private val cacheSize = maxMemory / 8
+        val memoryCache: LruCache<String, Bitmap> = LruCache<String, Bitmap>(cacheSize)
+    }
+
     @Synchronized override fun onHandleIntent(intent: Intent?) {
         val imageUrl = intent?.getStringExtra("url")
         var bimage: Bitmap? = null
@@ -23,7 +30,8 @@ class IntentImageDownloadingService : IntentService("IntentImageDownloadingServi
             e.printStackTrace()
         }
         if (bimage != null) {
-            ImageActivity.memoryCache.put(imageUrl, bimage)
+            //ImageActivity.memoryCache.put(imageUrl, bimage)
+            memoryCache.put(imageUrl, bimage)
             LocalBroadcastManager.getInstance(this).sendBroadcast(Intent("android.intent.action.DOWNLOAD_ENDED"))
             Log.i("RECEIVER","Message sent")
         }
