@@ -17,7 +17,7 @@ class IntentImageDownloadingService : IntentService("IntentImageDownloadingServi
         val memoryCache: LruCache<String, Bitmap> = LruCache<String, Bitmap>(cacheSize)
     }
 
-    @Synchronized override fun onHandleIntent(intent: Intent?) {
+    override fun onHandleIntent(intent: Intent?) {
         val imageUrl = intent?.getStringExtra("url")
         var bimage: Bitmap? = null
         try {
@@ -30,8 +30,7 @@ class IntentImageDownloadingService : IntentService("IntentImageDownloadingServi
             e.printStackTrace()
         }
         if (bimage != null) {
-            //ImageActivity.memoryCache.put(imageUrl, bimage)
-            memoryCache.put(imageUrl, bimage)
+            synchronized(memoryCache) { memoryCache.put(imageUrl, bimage) }
             LocalBroadcastManager.getInstance(this).sendBroadcast(Intent("android.intent.action.DOWNLOAD_ENDED"))
             Log.i("RECEIVER","Message sent")
         }

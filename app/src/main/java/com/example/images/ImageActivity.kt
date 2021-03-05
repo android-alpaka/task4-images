@@ -1,23 +1,18 @@
 package com.example.images
 
-import android.content.*
-import android.graphics.Bitmap
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
 import android.util.Log
-import android.util.LruCache
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.example.images.IntentImageDownloadingService.Companion.memoryCache
 import kotlinx.android.synthetic.main.activity_image.*
-import java.util.*
 
 class ImageActivity : AppCompatActivity() {
-    //companion object {
-    //    private val maxMemory = (Runtime.getRuntime().maxMemory() / 1024).toInt()
-    //    private val cacheSize = maxMemory / 8
-    //    val memoryCache: LruCache<String, Bitmap> = LruCache<String, Bitmap>(cacheSize)
-    //}
     lateinit var url : String
     private val broadcastReceiver = PictureBroadcastReceiver()
 
