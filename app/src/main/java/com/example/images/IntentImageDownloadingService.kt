@@ -9,7 +9,7 @@ import java.io.IOException
 import java.net.URL
 
 class IntentImageDownloadingService : IntentService("IntentImageDownloadingService") {
-    override fun onHandleIntent(intent: Intent?) {
+    @Synchronized override fun onHandleIntent(intent: Intent?) {
         val imageUrl = intent?.getStringExtra("url")
         var bimage: Bitmap? = null
         try {
