@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import java.io.IOException
 import java.net.URL
 
@@ -23,7 +24,7 @@ class IntentImageDownloadingService : IntentService("IntentImageDownloadingServi
         }
         if (bimage != null) {
             ImageActivity.memoryCache.put(imageUrl, bimage)
-            sendBroadcast(Intent("android.intent.action.DOWNLOAD_ENDED"))
+            LocalBroadcastManager.getInstance(this).sendBroadcast(Intent("android.intent.action.DOWNLOAD_ENDED"))
             Log.i("RECEIVER","Message sent")
         }
     }

@@ -7,6 +7,7 @@ import android.util.Log
 import android.util.LruCache
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import kotlinx.android.synthetic.main.activity_image.*
 import java.util.*
 
@@ -24,7 +25,7 @@ class ImageActivity : AppCompatActivity() {
         setContentView(R.layout.activity_image)
         url = intent.extras?.getString("url").toString()
         Log.i("IMAGE_ACTIVITY", "IMAGE_ACTIVITY ${url.subSequence(11, 15)} created")
-        registerReceiver(broadcastReceiver, IntentFilter("android.intent.action.DOWNLOAD_ENDED"))
+        LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver, IntentFilter("android.intent.action.DOWNLOAD_ENDED"))
         if(memoryCache.get(url)==null){
             startService(
                 Intent(this, IntentImageDownloadingService::class.java).putExtra(
@@ -49,6 +50,6 @@ class ImageActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        unregisterReceiver(broadcastReceiver)
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver)
     }
 }
